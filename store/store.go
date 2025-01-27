@@ -1,3 +1,6 @@
+// In-memory store for battlershipper game. Tracks all the games in memory,
+// and performs the basic management operations like start game, join game,
+// retrieve and update.
 package store
 
 import (
@@ -7,6 +10,10 @@ import (
 	"github.com/danilopavk/battleshipper/engine"
 )
 
+// Stores all the data related to the game. Has one lock
+// for both pending and running games, so potentially we could
+// separate this into 2 structs if we see that locks are slowing
+// down the game, so at least one of the game phases are spared.
 type Store struct {
 	mutex            sync.RWMutex
 	GamesByGameId    map[int]engine.Game
@@ -14,6 +21,7 @@ type Store struct {
 	WaitingPlayers   map[int]engine.Player
 }
 
+// Builds the empty store
 func InitializeStore() Store {
 	return Store{
 		GamesByGameId:    map[int]engine.Game{},
@@ -22,6 +30,8 @@ func InitializeStore() Store {
 	}
 }
 
+// Starts a new game. Adds the player to waiting players map,
+// where they will wait for someone to join their game.
 func (store *Store) StartGame(playerName string) engine.Player {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
@@ -32,6 +42,8 @@ func (store *Store) StartGame(playerName string) engine.Player {
 	return player
 }
 
+// Returns a list of all waiting players. Should be used to offer list of
+// potential players whom games one might join
 func (store *Store) AllWaitingPlayers() []engine.Player {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
@@ -57,6 +69,8 @@ func (store *Store) AllWaitingPlayers() []engine.Player {
 	return players
 }
 
+// Retrieves a player and the corresponding game by player id. If player is in a waiting state,
+// game will be nil.
 func (store *Store) GetPlayerAndGame(playerId int) (engine.Player, engine.Game, error) {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
@@ -82,6 +96,8 @@ func (store *Store) GetPlayerAndGame(playerId int) (engine.Player, engine.Game, 
 	return engine.Player{}, engine.Game{}, fmt.Errorf("Game not found for player %d", playerId)
 }
 
+// Updates a player in the db. Can be either a waiting player, or one in
+// the active game.
 func (store *Store) UpdatePlayer(player engine.Player) error {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
@@ -110,6 +126,7 @@ func (store *Store) UpdatePlayer(player engine.Player) error {
 	return fmt.Errorf("Not found player with id %d to update", player.Id)
 }
 
+// Joins a game that the opponent already started
 func (store *Store) JoinGame(playerName string, opponentId int) engine.Game {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()
@@ -127,6 +144,7 @@ func (store *Store) JoinGame(playerName string, opponentId int) engine.Game {
 	return game
 }
 
+// Updates a game. It can update anything about the game - player data, or some game metadata
 func (store *Store) UpdateGame(game engine.Game) error {
 	store.mutex.Lock()
 	defer store.mutex.Unlock()

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/danilopavk/battleshipper/engine"
+	"github.com/google/go-cmp/cmp"
 )
 
 func Test_StartGame(t *testing.T) {
@@ -80,8 +81,8 @@ func Test_GetPlayerAndGame(t *testing.T) {
 
 	karsa, game, error := store.GetPlayerAndGame(playerA.Id)
 
-	if karsa.Id != playerA.Id {
-		t.Errorf("Unexpected player found, id: %d", karsa.Id)
+	if diff := cmp.Diff(karsa, game.PlayerA); diff != "" {
+		t.Errorf("Unexpected change in karsa: %v", diff)
 	}
 
 	if game.Id != startedGame.Id {
@@ -135,8 +136,8 @@ func Test_UpdatePendingPlayer(t *testing.T) {
 
 	result, _, _ := store.GetPlayerAndGame(player.Id)
 
-	if len(*result.Ships) != 1 {
-		t.Error("Expected updated player to have a ship!")
+	if diff := cmp.Diff(player, result); diff != "" {
+		t.Errorf("Unexpected diff on updated player: %v", diff)
 	}
 }
 
@@ -165,13 +166,10 @@ func Test_UpdatePlayerInGame(t *testing.T) {
 		t.Errorf("Unexpected error: %v", error)
 	}
 
-	karsa, game, _ = store.GetPlayerAndGame(karsa.Id)
+	updatedKarsa, _, _ := store.GetPlayerAndGame(karsa.Id)
 
-	if len(*karsa.Ships) != 1 {
-		t.Error("Karsa misses his ship!")
-	}
-	if len(*game.PlayerA.Ships) != 1 {
-		t.Error("Player A misses his ship!")
+	if diff := cmp.Diff(updatedKarsa, karsa); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
 
 	fiddlerShip := engine.Ship{
@@ -185,13 +183,10 @@ func Test_UpdatePlayerInGame(t *testing.T) {
 	}
 	_ = fiddler.AddShip(fiddlerShip)
 
-	fiddler, game, _ = store.GetPlayerAndGame(fiddler.Id)
+	updatedFiddler, _, _ := store.GetPlayerAndGame(fiddler.Id)
 
-	if len(*fiddler.Ships) != 1 {
-		t.Error("Karsa misses his ship!")
-	}
-	if len(*game.PlayerB.Ships) != 1 {
-		t.Error("Player A misses his ship!")
+	if diff := cmp.Diff(updatedFiddler, fiddler); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
 
 }
@@ -247,14 +242,12 @@ func Test_UpdateGame(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	fiddler, game, _ = store.GetPlayerAndGame(fiddler.Id)
+	updatedFiddler, updatedGame, _ := store.GetPlayerAndGame(fiddler.Id)
 
-	if *game.Turn != fiddler.Id {
-		t.Error("Expected to be fiddler's turn, but it isn't")
+	if diff := cmp.Diff(updatedFiddler, fiddler); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
-
-	if len(*fiddler.Ships) != 1 {
-		t.Errorf("Found %d ships, but expected 1!", len(*fiddler.Ships))
+	if diff := cmp.Diff(updatedGame, game); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
-
 }

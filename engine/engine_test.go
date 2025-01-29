@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func Test_InitializeGame(t *testing.T) {
@@ -70,8 +72,8 @@ func Test_AvailableCells(t *testing.T) {
 				actuallyAvailable++
 			}
 		}
-		if actuallyAvailable != expectedAvailable {
-			t.Errorf("Unexpected length at index %d; expected: %d, was: %d", cellIndex, expectedAvailable, actuallyAvailable)
+		if diff := cmp.Diff(actuallyAvailable, expectedAvailable); diff != "" {
+			t.Errorf("unexpected diff: %v", diff)
 		}
 	}
 }
@@ -93,12 +95,9 @@ func Test_ShootAndHit(t *testing.T) {
 	}
 
 	hits := player.Target.Hits
-	lenCounter := len(hits)
-	if !(lenCounter == 1) {
-		t.Error(fmt.Errorf("Expected to find 1 hit, but found %d", lenCounter))
-	}
-	if !hits[Cell{0, 0}] {
-		t.Error("Expected to find zero cell, but not found")
+
+	if diff := cmp.Diff(map[Cell]bool{{0, 0}: true}, hits); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
 
 	if sank {
@@ -127,12 +126,8 @@ func Test_ShootAndMiss(t *testing.T) {
 	}
 
 	misses := player.Target.Misses
-	lenCounter := len(misses)
-	if !(lenCounter == 1) {
-		t.Error(fmt.Errorf("Expected to find 1 miss, but found %d", lenCounter))
-	}
-	if !misses[Cell{9, 9}] {
-		t.Error("Expected to find 9-9 cell, but not found")
+	if diff := cmp.Diff(map[Cell]bool{{9, 9}: true}, misses); diff != "" {
+		t.Errorf("Unexpected diff %v", diff)
 	}
 }
 
@@ -192,15 +187,35 @@ func Test_ShootAndSink(t *testing.T) {
 		t.Error(fmt.Errorf("Unexpected error, %v", err))
 	}
 
-	if len(*player.Target.SankShips) != 1 {
-		t.Error("Expected to have a sank ship, but there isn't")
+	expectedSankShips := []Ship{
+		{
+			Cells: map[Cell]bool{
+				{0, 0}: true,
+				{0, 1}: true,
+				{0, 2}: true,
+				{0, 3}: true,
+				{0, 4}: true,
+			},
+		},
+	}
+	if diff := cmp.Diff(expectedSankShips, *player.Target.SankShips); diff != "" {
+		t.Errorf("Unexpected diff: %v", diff)
 	}
 
 	if len(player.Target.Hits) == 0 {
 		t.Error("Expected to cleanup Hits object, but it didn't")
 	}
 
-	if len(player.Target.Misses) != 7 {
+	expectedMisses := map[Cell]bool{
+		{1, 0}: true,
+		{1, 1}: true,
+		{1, 2}: true,
+		{1, 3}: true,
+		{1, 4}: true,
+		{1, 5}: true,
+		{0, 5}: true,
+	}
+	if diff := cmp.Diff(expectedMisses, player.Target.Misses); diff != "" {
 		t.Error(fmt.Errorf("Expected ship sinking to bring 7 misses in neighbor cells, but there are %v", player.Target.Misses))
 	}
 }

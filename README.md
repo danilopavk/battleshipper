@@ -2,7 +2,11 @@
 
 ## Repository overview
 
-This repository is intended to contain the code necessary to run battleshipper game. For now, it only contains engine package containing basic game logic.
+This repository is intended to contain the code necessary to run battleshipper game. For now, it contains:
+
+ - Engine package containing basic game logic.
+ - Store package containing in-memory store for the game state. Naive implementation, set up to enable initial testing.
+ - Initial web setup: home page with basic instructions and a "start game" button that initializes the game for the player.
 
 ## Game description
 

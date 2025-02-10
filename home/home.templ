@@ -1,0 +1,41 @@
+package home
+
+templ readme() {
+	<h1>Battleship game</h1>
+	<div class="mb-2">A two-player game, where you're trying to sink your opponent before they sink yours!</div>
+	<div class="mb-2">
+		Game is played on 10x10 board. First, each player is choosing their own ships: one of size 5 cells, 
+		two of size 4 and two of size 3, each cell representing a single ship engine. Once both players choose 
+		all their ships, they take turns bombarding a single opponent's cell. If the cell they chose contains 
+		the opponent's ship, it means engine is hit. Once all engines of a ship are hit, the ship is sunk. 
+		Game ends once all ships of one player are sunk, and the winner is surviving player.
+	</div>
+}
+
+templ start() {
+	<h2>Start new game</h2>
+	<div class="mb-5">Tell us your name, press start and wait for someone to join your game</div>
+	<form
+		hx-post="/start"
+		hx-ext="json-enc"
+	>
+		<input id="name" name="name" type="text" class="border"/>
+		<button type="submit" class="mb-2 font-medium">Start</button>
+	</form>
+}
+
+templ Page() {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+			<script src="https://unpkg.com/htmx-ext-json-enc@2.0.1/json-enc.js"></script>
+			<link href="/static/output.css" rel="stylesheet"/>
+		</head>
+		// light sky background, dark sky text
+		<body class="bg-sky-100 text-sky-900 p-3">
+			@readme()
+			@start()
+		</body>
+	</html>
+}

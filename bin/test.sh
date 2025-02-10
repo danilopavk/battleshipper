@@ -1,5 +1,7 @@
 #!bin/sh
 
+echo "generating templates"
+templ generate
 echo "Formatting"
 go fmt ./...
 echo "Formatting imports"

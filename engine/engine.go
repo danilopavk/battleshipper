@@ -90,19 +90,19 @@ func (game *Game) Shoot(playerId int, cell Cell) (hit bool, sank bool, won bool,
 		return false, false, false, fmt.Errorf("Player %d tried to shoot, but it's not their turn", playerId)
 	}
 
-	var player Player
+	var me Player
 	var opponent Player
 
 	switch playerId {
 	case game.PlayerA.Id:
 		{
-			player = game.PlayerA
+			me = game.PlayerA
 			opponent = game.PlayerB
 			*game.Turn = opponent.Id
 		}
 	case game.PlayerB.Id:
 		{
-			player = game.PlayerB
+			me = game.PlayerB
 			opponent = game.PlayerB
 			*game.Turn = opponent.Id
 
@@ -113,21 +113,21 @@ func (game *Game) Shoot(playerId int, cell Cell) (hit bool, sank bool, won bool,
 
 	hit = opponent.shoot(cell)
 	if !hit {
-		player.Target.Misses[cell] = true
+		me.Target.Misses[cell] = true
 		return hit, false, false, nil
 	}
-	player.Target.Hits[cell] = true
+	me.Target.Hits[cell] = true
 
-	ship := player.shipFromHits(cell)
+	ship := me.shipFromHits(cell)
 	if !opponent.sank(ship) {
 		return hit, false, false, nil
 	}
-	player.markAsSank(ship)
+	me.markAsSank(ship)
 
-	if len(*player.Target.SankShips) != 5 {
+	if len(*me.Target.SankShips) != 5 {
 		return hit, true, false, nil
 	}
-	game.Winner = &player.Id
+	game.Winner = &me.Id
 	return hit, true, true, nil
 }
 
@@ -172,9 +172,8 @@ func (player Player) AddShip(ship Ship) error {
 		return fmt.Errorf("Cannot add ship, expected length %d, was %d", nextShipLength, len(ship.Cells))
 	}
 
-	availableCells := player.AvailableCells()
 	for cell := range ship.Cells {
-		if !availableCells[cell.X][cell.Y] {
+		if !player.AvailableCells()[cell.X][cell.Y] {
 			return fmt.Errorf("Cannot add ship, cell not available %d - %d", cell.X, cell.Y)
 		}
 	}
@@ -225,44 +224,44 @@ func (player Player) nextShipLength() (int, error) {
 }
 
 func neighborCells(originCell Cell, includeDiagonal bool, filter func(Cell) bool) []Cell {
-	cells := []Cell{}
+	neighbors := []Cell{}
 
 	if originCell.X > 0 {
 		neighbor := Cell{originCell.X - 1, originCell.Y}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if originCell.X < width-1 {
 		neighbor := Cell{originCell.X + 1, originCell.Y}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if originCell.Y > 0 {
 		neighbor := Cell{originCell.X, originCell.Y - 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if originCell.Y < height-1 {
 		neighbor := Cell{originCell.X, originCell.Y + 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if !includeDiagonal {
-		return cells
+		return neighbors
 	}
 
 	if originCell.X > 0 && originCell.Y > 0 {
 		neighbor := Cell{originCell.X - 1, originCell.Y - 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 
 	}
@@ -270,25 +269,25 @@ func neighborCells(originCell Cell, includeDiagonal bool, filter func(Cell) bool
 	if originCell.X < width-1 && originCell.Y > 0 {
 		neighbor := Cell{originCell.X + 1, originCell.Y - 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if originCell.X < width-1 && originCell.Y < height-1 {
 		neighbor := Cell{originCell.X + 1, originCell.Y + 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	if originCell.X > 0 && originCell.Y < height-1 {
 		neighbor := Cell{originCell.X - 1, originCell.Y + 1}
 		if filter(neighbor) {
-			cells = append(cells, neighbor)
+			neighbors = append(neighbors, neighbor)
 		}
 	}
 
-	return cells
+	return neighbors
 }
 
 func (player Player) shipFromHits(cell Cell) Ship {
@@ -311,11 +310,7 @@ func (player Player) shipFromHits(cell Cell) Ship {
 		queue = append(queue, neighborCells(next, false, filter)...)
 	}
 
-	cells := map[Cell]bool{}
-	for cell := range shipCells {
-		cells[cell] = true
-	}
-	return Ship{cells}
+	return Ship{shipCells}
 
 }
 

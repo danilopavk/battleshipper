@@ -1,4 +1,5 @@
 // Package engine provides a way to manage the game of battleship.
+//
 // It stores the game in the object and allows basic operations on it.
 package engine
 
@@ -13,6 +14,7 @@ const width = 10
 const height = 10
 
 // Game is an object holding the whole data related to a single game.
+//
 // Two objects representing two players, Turn int representing an id
 // of the player whose turn it is, and Winner int representing an id
 // of the winning player.
@@ -23,10 +25,12 @@ type Game struct {
 	Winner           *int
 }
 
-// Player type holds the data on one contestant of the game. Ships
-// pointer represents ships that belong to the player. Target pointer
+// Player type holds the data on one contestant of the game.
+//
+// Ships pointer represents ships that belong to the player. Target pointer
 // represents all the data that this player has on the opposing player's
-// board
+// board. They are mutable represntations of the player's and opposing
+// player's boards
 type Player struct {
 	Id     int
 	Name   string
@@ -35,6 +39,7 @@ type Player struct {
 }
 
 // Target type holds the data that one player has on the opposing player's board.
+//
 // SankShips object contains ships that are completely sank. Hits contain hits
 // on ships that aren't completely sunk yet. Misses contains cells where this player
 // knows that are empty - either by direct hits or because they are adjacent to a sank ship
@@ -54,13 +59,16 @@ type Cell struct {
 	X, Y int
 }
 
-// InitializeGame sets up the game between 2 players. To create the player,
-// call InitializePlayer method
+// InitializeGame sets up the game between 2 players.
+//
+// To create the player, call InitializePlayer method
 func InitializeGame(playerA, playerB Player, turn int) Game {
 	return Game{rand.Int(), playerA, playerB, &turn, nil}
 }
 
-// NextShipLength is a function used in the first phase of the game, while
+// NextShipLength method retrieves a desired lenght of the next ship to be added.
+//
+// It's used in the first phase of the game, while
 // players are still creating the ships. It's used to instruct players how
 // large the next ship should be
 func (game Game) NextShipLength(playerId int) (int, error) {
@@ -74,8 +82,10 @@ func (game Game) NextShipLength(playerId int) (int, error) {
 	}
 }
 
-// Shoot method is a function used in the second phase of the game. Player whose turn it is
-// tries to guess where the ships are. The function returns 4 values: 1) Weather the ship was hit 2)
+// Shoot method is used in the second phase of the game.
+//
+// It allows the Player whose turn it is to guess where the ships are.
+// The function returns 4 values: 1) Weather the ship was hit 2)
 // Weather this hit sank the ship 3) Weather this sank ship means that the player won the game 4)
 // Error thrown if the shot is illegal. The shot is illegal if 1) The shooting phase of the game didn't
 // start yet 2) It's not player's turn 3) It's not even player's game
@@ -137,8 +147,7 @@ func InitializePlayer(name string) Player {
 	return Player{rand.Int(), name, &[]Ship{}, &target}
 }
 
-// AvailableCells method gives a utility method that can be used to draw the board
-// for the player.
+// AvailableCells method gives a utility method that can be used to draw the board for the player.
 func (player Player) AvailableCells() map[int]map[int]bool {
 	cells := map[int]map[int]bool{}
 	for x := 0; x < width; x++ {
@@ -160,9 +169,10 @@ func (player Player) AvailableCells() map[int]map[int]bool {
 	return cells
 }
 
-// AddShip method is a method used in the initializing phase of the game. It allows
-// the player to add the ship to their method. Returns error if the provided ship isn't
-// of the correct length
+// AddShip allows the player to add the ship to their board.
+//
+// Returns error if the provided ship isn't of the correct length.
+// It's used as a utility method in the first phase of the game
 func (player Player) AddShip(ship Ship) error {
 	nextShipLength, err := player.nextShipLength()
 	if err != nil {

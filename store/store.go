@@ -55,21 +55,8 @@ func (store *Store) AllWaitingPlayers() []engine.Player {
 	defer store.mutex.RUnlock()
 
 	players := []engine.Player{}
-	// return deep copy of the players list
 	for _, player := range store.WaitingPlayers {
-		// while waiting for the game, target will always be empty
-		target := engine.Target{
-			SankShips: &[]engine.Ship{},
-			Hits:      map[engine.Cell]bool{},
-			Misses:    map[engine.Cell]bool{},
-		}
-		// deep copy current ships
-		ships := []engine.Ship{}
-		ships = append(ships, *player.Ships...)
-		players = append(
-			players,
-			engine.Player{Id: player.Id, Name: player.Name, Ships: &ships, Target: &target},
-		)
+		players = append(players, player)
 	}
 
 	return players

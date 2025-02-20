@@ -12,7 +12,7 @@ import (
 
 func main() {
 	gameStore := store.InitializeStore()
-	homePage := home.Page()
+	homePage := home.Page(&gameStore)
 	http.Handle("/", templ.Handler(homePage))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	http.HandleFunc("/start", func(writer http.ResponseWriter, request *http.Request) {
@@ -24,8 +24,8 @@ func main() {
 				return
 			}
 
-			player := gameStore.StartGame(startPlayer.Name)
-			fmt.Printf("Started a game with player %+v\n", player)
+			gameStore.StartGame(startPlayer.Name)
+
 		}
 	})
 

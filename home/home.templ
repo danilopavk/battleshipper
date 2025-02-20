@@ -1,5 +1,8 @@
 package home
 
+import "github.com/danilopavk/battleshipper/engine"
+import "github.com/danilopavk/battleshipper/store"
+
 templ readme() {
 	<h1>Battleship game</h1>
 	<div class="mb-2">A two-player game, where you're trying to sink your opponent before they sink yours!</div>
@@ -24,7 +27,25 @@ templ start() {
 	</form>
 }
 
-templ Page() {
+templ displayWaiting(players []engine.Player) {
+	<h2>Players waiting to join</h2>
+	if len(players) > 0 {
+		<ul>
+			for _, player := range players {
+				<li>
+					{ player.Name }
+				</li>
+			}
+		</ul>
+	}
+	<div class="mb-2">
+		if len(players) == 0 {
+			No players waiting
+		}
+	</div>
+}
+
+templ Page(store *store.Store) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -36,6 +57,7 @@ templ Page() {
 		<body class="bg-sky-100 text-sky-900 p-3">
 			@readme()
 			@start()
+			@displayWaiting(store.AllWaitingPlayers())
 		</body>
 	</html>
 }

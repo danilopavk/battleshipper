@@ -5,11 +5,12 @@ package home
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
-import "github.com/danilopavk/battleshipper/engine"
-import "github.com/danilopavk/battleshipper/store"
+import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/danilopavk/battleshipper/engine"
+	"github.com/danilopavk/battleshipper/store"
+)
 
 func readme() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -61,7 +62,7 @@ func start() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h2>Start new game</h2><div class=\"mb-5\">Tell us your name, press start and wait for someone to join your game</div><form hx-post=\"/start\" hx-ext=\"json-enc\"><input id=\"name\" name=\"name\" type=\"text\" class=\"border\"> <button type=\"submit\" class=\"mb-2 font-medium\">Start</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h2>Start new game</h2><div class=\"mb-5\">Tell us your name, press start and wait for someone to join your game</div><form hx-post=\"/start\" hx-ext=\"json-enc\" hx-swap=\"outerHTML\" hx-target=\"#game\"><input id=\"name\" name=\"name\" type=\"text\" class=\"border\"> <button type=\"submit\" class=\"mb-2 font-medium\">Start</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -107,7 +108,7 @@ func displayWaiting(players []engine.Player) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(player.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `home/home.templ`, Line: 36, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `home/home.templ`, Line: 38, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -170,6 +171,10 @@ func Page(store *store.Store) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div id=\"game\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = start().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -178,7 +183,7 @@ func Page(store *store.Store) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

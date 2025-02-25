@@ -54,7 +54,7 @@ func (store *Store) AllWaitingPlayers() []engine.Player {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
 
-	players := []engine.Player{}
+	var players []engine.Player
 	for _, player := range store.WaitingPlayers {
 		players = append(players, player)
 	}

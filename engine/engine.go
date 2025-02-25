@@ -234,7 +234,7 @@ func (player Player) nextShipLength() (int, error) {
 }
 
 func neighborCells(originCell Cell, includeDiagonal bool, filter func(Cell) bool) []Cell {
-	neighbors := []Cell{}
+	var neighbors []Cell
 
 	if originCell.X > 0 {
 		neighbor := Cell{originCell.X - 1, originCell.Y}

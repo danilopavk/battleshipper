@@ -176,7 +176,7 @@ func (player Player) AvailableCells() map[int]map[int]bool {
 func (player Player) AddShip(ship Ship) error {
 	nextShipLength, err := player.nextShipLength()
 	if err != nil {
-		return err
+		return fmt.Errorf("Cannot add ship to player %v because of error: %w", player.Id, err)
 	}
 	if len(ship.Cells) != nextShipLength {
 		return fmt.Errorf("Cannot add ship, expected length %d, was %d", nextShipLength, len(ship.Cells))
